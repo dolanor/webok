@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"text/tabwriter"
@@ -49,15 +48,15 @@ func main() {
 	go systray.Run(onReady, nil)
 
 	ticker := time.NewTicker(5 * time.Second)
-	w := &tabwriter.Writer{}
-	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
+	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
 	for range ticker.C {
 		start := time.Now()
 		resp, err := http.Get("https://free.fr")
 		end := time.Now()
 
 		if err != nil {
-			log.Println(err)
+			fmt.Fprintf(w, "%s\t❌\t%v\n", 0*time.Millisecond, err)
+			w.Flush()
 			systray.SetIcon(noSignalIconData)
 			continue
 		}
@@ -66,7 +65,7 @@ func main() {
 		systray.SetIcon(signal100IconData)
 		dur := end.Sub(start)
 
-		fmt.Fprintf(w, "%s\tall good :)\n", dur.Truncate(time.Millisecond*10))
+		fmt.Fprintf(w, "%s\t✓\n", dur.Truncate(time.Millisecond*10))
 		w.Flush()
 	}
 }
