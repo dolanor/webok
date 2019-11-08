@@ -46,12 +46,15 @@ func onReady() {
 func main() {
 	loadIcons()
 	go systray.Run(onReady, nil)
+	c := http.Client{
+		Timeout: 30 * time.Second,
+	}
 
 	ticker := time.NewTicker(5 * time.Second)
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
 	for range ticker.C {
 		start := time.Now()
-		resp, err := http.Get("https://free.fr")
+		resp, err := c.Get("https://free.fr")
 		end := time.Now()
 
 		if err != nil {
