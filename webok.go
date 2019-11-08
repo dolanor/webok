@@ -12,40 +12,43 @@ import (
 	"github.com/markbates/pkger"
 )
 
-var (
-	signal100IconData []byte
-	noSignalIconData  []byte
-)
-
-func loadIcons() {
+func loadIcons() (noSignalIconData, signal100IconData []byte, err error) {
 	s100f, err := pkger.Open("/asset/img/nm-signal-100.png")
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 	nosf, err := pkger.Open("/asset/img/nm-no-connection.png")
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 	defer s100f.Close()
 
 	noSignalIconData, err = ioutil.ReadAll(nosf)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
 	}
 
 	signal100IconData, err = ioutil.ReadAll(s100f)
 	if err != nil {
-		panic(err)
+		return nil, nil, err
+	}
+
+	return noSignalIconData, signal100IconData, nil
+}
+
+func onReady(noSignalIconData []byte) func() {
+	return func() {
+		systray.SetIcon(noSignalIconData)
 	}
 }
 
-func onReady() {
-	systray.SetIcon(noSignalIconData)
-}
-
 func main() {
-	loadIcons()
-	go systray.Run(onReady, nil)
+	noSignalIconData, signal100IconData, err := loadIcons()
+	if err != nil {
+		panic(err)
+	}
+
+	go systray.Run(onReady(noSignalIconData), nil)
 	c := http.Client{
 		Timeout: 30 * time.Second,
 	}
