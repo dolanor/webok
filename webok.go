@@ -36,9 +36,13 @@ func loadIcons() (noSignalIconData, signal100IconData []byte, err error) {
 	return noSignalIconData, signal100IconData, nil
 }
 
-func onReady(noSignalIconData []byte) func() {
+func onReady(noSignalIconData []byte, quitCh chan struct{}) func() {
 	return func() {
 		systray.SetIcon(noSignalIconData)
+		quit := systray.AddMenuItem("Quit", "Quit")
+		<-quit.ClickedCh
+		log.Println("quitting")
+		quitCh <- struct{}{}
 	}
 }
 
@@ -48,7 +52,8 @@ func main() {
 		panic(err)
 	}
 
-	go systray.Run(onReady(noSignalIconData), nil)
+	quitCh := make(chan struct{})
+	go systray.Run(onReady(noSignalIconData, quitCh), nil)
 	c := http.Client{
 		Timeout: 30 * time.Second,
 	}
@@ -56,6 +61,12 @@ func main() {
 	ticker := time.NewTicker(5 * time.Second)
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
 	for range ticker.C {
+		select {
+		case <-quitCh:
+			goto out
+		default:
+		}
+
 		start := time.Now()
 		resp, err := c.Get("https://free.fr")
 		end := time.Now()
@@ -74,4 +85,5 @@ func main() {
 		fmt.Fprintf(w, "%s\t✓\n", dur.Truncate(time.Millisecond*10))
 		w.Flush()
 	}
+out:
 }
