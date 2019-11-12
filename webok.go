@@ -86,4 +86,5 @@ func main() {
 		w.Flush()
 	}
 out:
+	ticker.Stop()
 }
