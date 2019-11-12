@@ -55,7 +55,7 @@ func main() {
 	quitCh := make(chan struct{})
 	go systray.Run(onReady(noSignalIconData, quitCh), nil)
 	c := http.Client{
-		Timeout: 30 * time.Second,
+		Timeout: 5 * time.Second,
 	}
 
 	ticker := time.NewTicker(5 * time.Second)
