@@ -58,7 +58,7 @@ func main() {
 		Timeout: 5 * time.Second,
 	}
 
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(30 * time.Second)
 	w := tabwriter.NewWriter(os.Stdout, 0, 8, 0, '\t', 0)
 	for range ticker.C {
 		select {
