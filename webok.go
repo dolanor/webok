@@ -1,6 +1,7 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,15 +11,17 @@ import (
 	"time"
 
 	"github.com/getlantern/systray"
-	"github.com/markbates/pkger"
 )
 
+//go:embed asset
+var assets embed.FS
+
 func loadIcons() (noSignalIconData, signal100IconData []byte, err error) {
-	s100f, err := pkger.Open("/asset/img/nm-signal-100.png")
+	s100f, err := assets.Open("asset/img/nm-signal-100.png")
 	if err != nil {
 		return nil, nil, err
 	}
-	nosf, err := pkger.Open("/asset/img/nm-no-connection.png")
+	nosf, err := assets.Open("asset/img/nm-no-connection.png")
 	if err != nil {
 		return nil, nil, err
 	}
